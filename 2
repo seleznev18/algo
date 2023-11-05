@@ -1,0 +1,71 @@
+import math
+def multi(a,b):
+    ans=[]
+    for j in range(len(a)):
+        ans.append([0]*len(b[0]))
+    for i in range(len(ans)):
+        for j in range(len(ans[i])):
+            for p in range(len(b)):
+                ans[i][j]+=(a[i][p]*b[p][j])
+    return ans
+def transition(x,osn,arr):
+    ans=[0]*(len(arr)-1)
+    i=-1
+    while x>0:
+       ans[i]=(x%osn)
+       x//=osn
+       i-=1
+    return ans
+def make_order(arr):
+    arr_order=[]
+    i=0
+    while len(arr_order)<math.factorial(len(arr)-1):
+        x=transition(i,(len(arr)),arr)
+        flag=True
+        for j in range(len(x)):
+            if x.count(x[j])!=1:
+                flag=False
+                break
+        if flag==True and x.count(0)==0:
+            arr_order.append(x)
+        i+=1   
+    return arr_order
+def count_steps(arr):
+    order=make_order(arr)
+    min_count=10**20
+    for i in range(len(order)):
+        arr_index=[]
+        for p in range(len(arr)):
+            arr_index.append(p)
+        tmp=arr.copy()
+        count_multi=0
+        for k in range(len(order[i])):
+            j=k
+            b_index=arr_index.index(j+1)
+            a_index=b_index-1
+            count_multi+=(len(tmp[a_index])*len(tmp[a_index][0])*len(tmp[b_index][0]))
+            tmp[b_index]=multi(tmp[a_index],tmp[b_index])
+            delete=arr_index[a_index]
+            tmp.pop(a_index)
+            arr_index.remove(delete)
+        min_count=min(min_count,count_multi)
+    return min_count,tmp
+n=int(input('Введите количество матриц:'))
+arr_main=[]
+for i in range(n):
+    b=[]
+    print('Введите матрицу, после ввода последней строки - нажмите enter\n')
+    while True:
+        x=list(map(int,input().split()))
+        if len(x)==0:
+            break
+        else:
+            b.append(x)
+    arr_main.append(b)
+z,c=count_steps(arr_main)
+print('Минимальное количество операций =',z)
+print('Произведение матриц:')
+for i in range(len(c)):
+    for j in range(len(c[i])):
+        print(c[i][j])
+    print()
