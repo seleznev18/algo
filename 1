@@ -1,19 +1,31 @@
 def robbery(N, M, K, weights, values):
-    matrix = [[0] * (M + 1) for _ in range(N + 1)]
+    table = [[0] * (K * M + 1) for _ in range(N + 1)]
 
     for i in range(1, N + 1):
-        for j in range(1, M + 1):
-            matrix[i][j] = matrix[i - 1][j]
-            if weights[i - 1] <= K:
-                matrix[i][j] = max(matrix[i][j], matrix[i - 1][j - 1] + values[i - 1])
-    return matrix[N][M]
+        for j in range(1, K * M + 1):
+            if weights[i - 1] <= j:
+                table[i][j] = max(table[i - 1][j], table[i - 1][j - weights[i - 1]] + values[i - 1])
+            else:
+                table[i][j] = table[i - 1][j]
 
-# Пример использования функции
-N = 5  # количество экспонатов
-M = 6  # количество заходов в музей
-K = 7  # максимальный вес, который вор может унести за один заход
-weights = [2, 1, 3, 2, 5]  # веса экспонатов
-values = [12, 10, 20, 15, 14]  # ценности экспонатов
+    max_value = table[N][K * M]
+    stolen_items = []
+    j = K * M
 
-max_robbery = robbery(N, M, K, weights, values)
-print("Максималиная возможная сумма украденных эспонатов:", max_robbery)
+    for i in range(N, 0, -1):
+        if table[i][j] != table[i - 1][j]:
+            stolen_items.append(i - 1)
+            j -= weights[i - 1]
+
+    return max_value, stolen_items[::-1]
+
+
+N = 4
+M = 2
+K = 3
+weights = [2, 1, 3, 2]
+values = [12, 10, 20, 15]
+
+max_value, stolen_items = robbery(N, M, K, weights, values)
+print("Максимально возможная стоимость украденных экспонатов:", max_value)
+print("унесённые экспонаты:", *stolen_items)
